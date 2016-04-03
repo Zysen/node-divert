@@ -1,4 +1,4 @@
-WinDivert 1.1: NodeJS Bindings
+node-windivert: NodeJS bindings for WinDivert
 ====================================
 
 1. Introduction
@@ -14,7 +14,7 @@ See the windivert readme: https://github.com/basil00/Divert/blob/master/README
 	2) Find WinDivert32.sys and WinDivert64.sys and put them in your project directory.
 	3) Find WinDivert.dll and put that in your project directory. Choose one from the amd64 or x86 directory depending on your build options. (Usually x86)
 	4) Find WinDivert.lib and put that in your project directory
-
+	5) npm install windivert
 3. Examples
 ---------------
 
