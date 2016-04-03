@@ -1,7 +1,7 @@
 {
   "name": "windivert",
-  "version": "0.0.1",
-  "description": "Node.js WinDivert",
+  "version": "0.0.8",
+  "description": "Node Bindings for Divert, currently only supports windows.",
   "keywords": [
     "deep packet inspection",
     "packet filtering",
@@ -10,7 +10,7 @@
     "packet crafting",
     "packet modification"
   ],
-  "license":"LGPL-3.0",
+  "license":"MIT",
   "scripts": {},
   "cpu" : [ "x64", "ia32" ],
   "os" : [ "win32"],
@@ -21,5 +21,10 @@
   {
   "type" : "git",
   "url" : "https://github.com/Zysen/node-divert"
+  },
+  "scripts" :
+  {
+  	"preinstall" : "node scripts/preinstall.js",
+  	"install" : "node-gyp clean configure build"
   }
 }
