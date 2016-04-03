@@ -20,23 +20,23 @@ See the windivert readme: https://github.com/basil00/Divert/blob/master/README
 
 	//Print Packet
 	var wd = require("windivert");
-	wd.listen("udp.DstPort==41234 or udp.SrcPort==41234", function(data, inbound){
-		console.log(data.toString());
+	wd.listen("tcp.DstPort==80 or tcp.SrcPort==80", function(data, inbound){
+		console.log("HTTP packet with length", data.length);
 	});
 
 	//Block Packet	
 	var wd = require("windivert");
-	wd.listen("udp.DstPort==41234 or udp.SrcPort==41234", function(data, inbound){
-		console.log("BLOCKED", data.toString());
+	wd.listen("tcp.DstPort==80 or tcp.SrcPort==80", function(data, inbound){
+		console.log("BLOCKED HTTP packet with length", data.length);
 		return false;
 	});
 
 	//Modify Packet
 	require("buffertools").extend();
 	var wd = require("windivert");
-	wd.listen("udp.DstPort==41234 or udp.SrcPort==41234", function(data, inbound){	//inbound is bool
+	wd.listen("tcp.DstPort==80 or tcp.SrcPort==80", function(data, inbound){	//inbound is bool
 		var d = new Buffer(data);
-		console.log(data.toString());
+		console.log(data.length);
 		var i = d.indexOf(new Buffer("BOB"));
 		if(i>=0){
 			d.writeUInt8("S".charCodeAt(0), i++);
