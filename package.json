@@ -16,5 +16,10 @@
   "os" : [ "win32"],
   "main": "windivert.js",
   "private": false,
-  "gypfile": true
+  "gypfile": true,
+  "repository" :
+  {
+  "type" : "git",
+  "url" : "https://github.com/Zysen/node-divert"
+  }
 }
