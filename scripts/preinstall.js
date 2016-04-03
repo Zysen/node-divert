@@ -20,11 +20,16 @@ var dllExists = fs.existsSync("WinDivert.dll");
 var sysExists = fs.existsSync(sysName);
 
 if((libExists && dllExists && sysExists)===false){
-	console.error("Missing Dependencies");
-	console.log("Please get the missing files from http://reqrypt.org/download/WinDivert-1.1.8-WDDK.zip or by building the git repository https://github.com/basil00/Divert\nAnd put them in your project directory");
-	console.log("WinDivert.lib", libExists?"FOUND":"MISSING");
-	console.log("WinDivert.dll", dllExists?"FOUND":"MISSING");
-	console.log(sysName, sysExists?"FOUND":"MISSING");	
+	console.log("*****************************************************************");
+	console.log("   ");
+	console.error("   Missing Dependencies\n");
+	console.log("   Please get the missing files from http://reqrypt.org/download/WinDivert-1.1.8-WDDK.zip or by building the git repository https://github.com/basil00/Divert\nAnd put them in your project directory");
+	console.log("");
+	console.log("   WinDivert.lib\t", libExists?"FOUND":"MISSING");
+	console.log("   WinDivert.dll\t", dllExists?"FOUND":"MISSING");
+	console.log("   "+sysName+"\t", sysExists?"FOUND":"MISSING");	
+	console.log("");
+	console.log("*****************************************************************");
 	console.log("");
 	process.exit(1);	
 }
