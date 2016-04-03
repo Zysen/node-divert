@@ -1,6 +1,6 @@
 {
   "name": "windivert",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Node Bindings for Divert, currently only supports windows.",
   "keywords": [
     "deep packet inspection",
