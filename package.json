@@ -1,0 +1,20 @@
+{
+  "name": "windivert",
+  "version": "0.0.1",
+  "description": "Node.js WinDivert",
+  "keywords": [
+    "deep packet inspection",
+    "packet filtering",
+    "packet blocking",
+    "firewall",
+    "packet crafting",
+    "packet modification"
+  ],
+  "license":"LGPL-3.0",
+  "scripts": {},
+  "cpu" : [ "x64", "ia32" ],
+  "os" : [ "win32"],
+  "main": "windivert.js",
+  "private": false,
+  "gypfile": true
+}
