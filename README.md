@@ -15,28 +15,33 @@ See the windivert readme: https://github.com/basil00/Divert/blob/master/README
 	3) Find WinDivert.dll and put that in your project directory. Choose one from the amd64 or x86 directory depending on your build options. (Usually x86)
 	4) Find WinDivert.lib and put that in your project directory
 
-3. Example Usage
+3. Examples
 ---------------
 
-require("buffertools").extend();
-var wd = require("windivert");
-wd.listen("udp.DstPort==41234 or udp.SrcPort==41234", function(data, inbound){	//inbound is bool
-	var d = new Buffer(data);
-	console.log(data.toString());
+	//Print Packet
+	var wd = require("windivert");
+	wd.listen("udp.DstPort==41234 or udp.SrcPort==41234", function(data, inbound){
+		console.log(data.toString());
+	});
 
-	var i = d.indexOf(new Buffer("BOB"));
-	if(i>=0){
-		d.writeUInt8("J".charCodeAt(0), i++);
-		d.writeUInt8("A".charCodeAt(1), i++);
-		d.writeUInt8("Y".charCodeAt(2), i++);
-	}
-	
-	return wd.HelperCalcChecksums(d, 0);
-});
+	//Block Packet	
+	var wd = require("windivert");
+	wd.listen("udp.DstPort==41234 or udp.SrcPort==41234", function(data, inbound){
+		console.log("BLOCKED", data.toString());
+		return false;
+	});
 
-4. Notes
-----------------
-In the wd.listen callback you can return:
-	1) false to block a packet.
-	2) Undefined to do nothing.
-	3) A buffer to modify the packet.
+	//Modify Packet
+	require("buffertools").extend();
+	var wd = require("windivert");
+	wd.listen("udp.DstPort==41234 or udp.SrcPort==41234", function(data, inbound){	//inbound is bool
+		var d = new Buffer(data);
+		console.log(data.toString());
+		var i = d.indexOf(new Buffer("BOB"));
+		if(i>=0){
+			d.writeUInt8("S".charCodeAt(0), i++);
+			d.writeUInt8("A".charCodeAt(1), i++);
+			d.writeUInt8("M".charCodeAt(2), i++);
+		}
+		return wd.HelperCalcChecksums(d, 0);
+	});
