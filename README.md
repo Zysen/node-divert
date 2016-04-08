@@ -40,8 +40,8 @@ See the windivert readme: https://github.com/basil00/Divert/blob/master/README
 		var i = d.indexOf(new Buffer("BOB"));
 		if(i>=0){
 			d.writeUInt8("S".charCodeAt(0), i++);
-			d.writeUInt8("A".charCodeAt(1), i++);
-			d.writeUInt8("M".charCodeAt(2), i++);
+			d.writeUInt8("A".charCodeAt(0), i++);
+			d.writeUInt8("M".charCodeAt(0), i++);
 		}
 		return wd.HelperCalcChecksums(d, 0);
 	});
