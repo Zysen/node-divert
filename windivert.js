@@ -1,4 +1,6 @@
-var wd = require(__dirname+'/build/Release/windivert');
+var fs = require("fs");
+var wd = (fs.existsSync(__dirname+"/build/Release/windivert.node"))?require(__dirname+"/build/Release/windivert.node"):require(__dirname+'/bin/'+process.arch+'/windivert.node');
+
 wd.decoders = require('./decoders.js');
 
 wd.listen = function(filter, cb, handleClose){

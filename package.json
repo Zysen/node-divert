@@ -1,6 +1,6 @@
 {
   "name": "windivert",
-  "version": "0.0.10",
+  "version": "0.0.15",
   "description": "Node Bindings for Divert, currently only supports windows.",
   "keywords": [
     "deep packet inspection",
@@ -11,12 +11,10 @@
     "packet modification"
   ],
   "license":"MIT",
-  "scripts": {},
   "cpu" : [ "x64", "ia32" ],
   "os" : [ "win32"],
   "main": "windivert.js",
   "private": false,
-  "gypfile": true,
   "repository" :
   {
   "type" : "git",
@@ -24,7 +22,8 @@
   },
   "scripts" :
   {
-  	"preinstall" : "node scripts/preinstall.js",
-  	"install" : "node-gyp clean configure build"
+  	"preinstall" : "move binding.gyp binding.gyp.BACKUP",
+  	"install":"move binding.gyp.BACKUP binding.gyp",
+  	"postinstall":"echo Windivert NodeJS wrapper installed."
   }
 }

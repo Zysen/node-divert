@@ -8,21 +8,17 @@ WinDivert: https://reqrypt.org/windivert.html
 
 See the windivert readme: https://github.com/basil00/Divert/blob/master/README
 
-2. Installation
+2. Usage
 ---------------
-	1) Download WinDivert-1.1.8-MSVC.zip from https://reqrypt.org/windivert.html
-	2) Find WinDivert32.sys and WinDivert64.sys and put them in your project directory.
-	3) Find WinDivert.dll and put that in your project directory. Choose one from the amd64 or x86 directory depending on your build options. (Usually x86)
-	4) Find WinDivert.lib and put that in your project directory
-	5) npm install windivert
-3. Examples
----------------
-
-	//Print Packet
+	npm install windivert
+	
 	var wd = require("windivert");
 	wd.listen("tcp.DstPort==80 or tcp.SrcPort==80", function(data, inbound){
 		console.log("HTTP packet with length", data.length);
 	});
+	
+3. Other Examples
+---------------
 
 	//Block Packet	
 	var wd = require("windivert");
@@ -45,3 +41,11 @@ See the windivert readme: https://github.com/basil00/Divert/blob/master/README
 		}
 		return wd.HelperCalcChecksums(d, 0);
 	});
+	
+4. Building
+---------------
+	1) Make sure node-gyp is installed and working. Instructions are here: https://github.com/nodejs/node-gyp
+	2) Download WinDivert-1.1.8-MSVC.zip from https://reqrypt.org/windivert.html and extract its contents into the module directory. 
+	3) node-gyp clean configure build
+	4) Windivert will automatically use the custom built binary from build/Release if it exists, instead of the precompiled binaries in ./bin
+	

@@ -1,9 +1,50 @@
-{
-  'targets': [
-    {
-      'target_name': 'windivert',
-      'sources': ['windivert.cc'],
-      'libraries': ["../WinDivert.lib"]
-    }
-  ]
+{  
+   'targets':[  
+      {  
+         'conditions':[  
+            [  
+               'target_arch=="ia32"',
+               {  
+                  'target_name':'windivert',
+                  'sources':[  
+                     'windivert.cc'
+                  ],
+                  'libraries':[  
+                     "../WinDivert-1.1.8-MSVC/x86/WinDivert.lib"
+                  ],
+                  'copies':[  
+                     {  
+                        'destination':'build/Release',
+                        'files':[  
+                           'WinDivert-1.1.8-MSVC/x86/WinDivert64.sys',
+                           'WinDivert-1.1.8-MSVC/x86/WinDivert.dll'
+                        ]
+                     }
+                  ]
+               }
+            ],
+            [  
+               'target_arch=="x64"',
+               {  
+                  'target_name':'windivert',
+                  'sources':[  
+                     'windivert.cc'
+                  ],
+                  'libraries':[  
+                     "../WinDivert-1.1.8-MSVC/amd64/WinDivert.lib"
+                  ],
+                  'copies':[  
+                     {  
+                        'destination':'build/Release',
+                        'files':[  
+                           'WinDivert-1.1.8-MSVC/amd64/WinDivert64.sys',
+                           'WinDivert-1.1.8-MSVC/amd64/WinDivert.dll'
+                        ]
+                     }
+                  ]
+               }
+            ]
+         ]
+      }
+   ]
 }
