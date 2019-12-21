@@ -1,216 +1,213 @@
-#include "uv.h"
-#include <node.h>
-#include <node_buffer.h>
-#include "windivert.h"
 #include "node-windivert.h"
-#include <windows.h>
-#include <string>
-#include <iostream>
 
-#define MAXBUF  0xFFFF
+class RecvWorker : public Napi::AsyncWorker {
+	public:
+		RecvWorker(Napi::Function& callback, HANDLE handle) : Napi::AsyncWorker(callback), handle(handle) {}
+		~RecvWorker() {}
+		void Execute() {
+			//cout << "WinDivertRecv" << endl;
+			if(!WinDivertRecv(handle, packet, sizeof(packet), &packetLen, &addr)){
+				Napi::TypeError::New(Env(), "Exception during WinDivertRecv\nAre you running as administrator?").ThrowAsJavaScriptException();
+			}
+			//cout << "WinDivertRecv packetLen " << packetLen << " Packet=" << packet << endl;
+		}
+		void OnOK() {
 
-namespace windivert {
-using namespace v8;
-using namespace node;
-using namespace std;
+	/*
+typedef struct
+{
+    INT64  Timestamp;                 Packet's timestamp. 
+    UINT32 Layer:8;                      Packet's layer.
+    UINT32 Event:8;                      Packet event. 
+    UINT32 Sniffed:1;                   Packet was sniffed? 
+    UINT32 Outbound:1;                  Packet is outound? 
+    UINT32 Loopback:1;                   Packet is loopback? 
+    UINT32 Impostor:1;                   Packet is impostor? 
+    UINT32 IPv6:1;                      Packet is IPv6? *
+    UINT32 IPChecksum:1;                Packet has valid IPv4 checksum? 
+    UINT32 TCPChecksum:1;                Packet has valid TCP checksum? 
+    UINT32 UDPChecksum:1;                Packet has valid UDP checksum? 
+    UINT32 Reserved1:8;
+    UINT32 Reserved2;
+    union
+    {
+        WINDIVERT_DATA_NETWORK Network;  Network layer data. 
+        WINDIVERT_DATA_FLOW Flow;       Flow layer data. 
+        WINDIVERT_DATA_SOCKET Socket;    Socket layer data. 
+        WINDIVERT_DATA_REFLECT Reflect;  Reflect layer data. 
+        UINT8 Reserved3[64];
+    };
+} WINDIVERT_ADDRESS, *PWINDIVERT_ADDRESS;
 
-using v8::Function;
-using v8::FunctionCallbackInfo;
-using v8::FunctionTemplate;
-using v8::Isolate;
-using v8::Local;
-using v8::Number;
-using v8::Object;
-using v8::Persistent;
-using v8::String;
-using v8::Value;
+typedef struct
+{
+    UINT32 IfIdx;                        Packet's interface index. 
+    UINT32 SubIfIdx;                     Packet's sub-interface index. 
+} WINDIVERT_DATA_NETWORK, *PWINDIVERT_DATA_NETWORK;
 
-Persistent<Function> WinDivert::constructor;
 
-void myFree (char * bu, void *hint) {
-	
+typedef struct
+{
+    UINT64 EndpointId;                   Endpoint ID. 
+    UINT64 ParentEndpointId;             Parent endpoint ID. 
+    UINT32 ProcessId;                    Process ID. 
+    UINT32 LocalAddr[4];                 Local address. 
+    UINT32 RemoteAddr[4];                Remote address. 
+    UINT16 LocalPort;                    Local port. 
+    UINT16 RemotePort;                   Remote port. 
+    UINT8  Protocol;                     Protocol. 
+} WINDIVERT_DATA_FLOW, *PWINDIVERT_DATA_FLOW;
+
+ WinDivert SOCKET layer data.
+ 
+typedef struct
+{
+    UINT64 EndpointId;                   Endpoint ID. 
+    UINT64 ParentEndpointId;             Parent Endpoint ID. 
+    UINT32 ProcessId;                    Process ID. 
+    UINT32 LocalAddr[4];                 Local address. 
+    UINT32 RemoteAddr[4];                Remote address. 
+    UINT16 LocalPort;                    Local port. 
+    UINT16 RemotePort;                   Remote port. 
+    UINT8  Protocol;                     Protocol. 
+} WINDIVERT_DATA_SOCKET, *PWINDIVERT_DATA_SOCKET;
+
+
+ WinDivert REFLECTION layer data.
+ 
+typedef struct
+{
+    INT64  Timestamp;                    Handle open time. 
+    UINT32 ProcessId;                    Handle process ID. 
+    WINDIVERT_LAYER Layer;               Handle layer. 
+    UINT64 Flags;                        Handle flags. 
+    INT16  Priority;                     Handle priority. 
+} WINDIVERT_DATA_REFLECT, *PWINDIVERT_DATA_REFLECT;
+*/
+
+
+		Napi::Env env = Env();
+
+		Napi::Object obj = Napi::Object::New(env);
+		obj.Set(Napi::String::New(env, "packet"), Napi::Buffer<char>::New(Env(), packet, (size_t)packetLen));
+		Napi::Object addrJs = Napi::Object::New(env);
+		addrJs.Set(Napi::String::New(env, "Timestamp"), addr.Timestamp);		//TODO Change this to bigint && put a number
+		addrJs.Set(Napi::String::New(env, "Layer"), addr.Layer);
+		addrJs.Set(Napi::String::New(env, "Event"), addr.Event); 
+		addrJs.Set(Napi::String::New(env, "Sniffed"), addr.Sniffed);
+		addrJs.Set(Napi::String::New(env, "Outbound"), addr.Outbound);
+		addrJs.Set(Napi::String::New(env, "Loopback"), addr.Loopback);
+		addrJs.Set(Napi::String::New(env, "Impostor"), addr.Impostor);
+		addrJs.Set(Napi::String::New(env, "IPv6"), addr.IPv6);
+		addrJs.Set(Napi::String::New(env, "IPChecksum"), addr.IPChecksum);
+		addrJs.Set(Napi::String::New(env, "TCPChecksum"), addr.TCPChecksum);
+		addrJs.Set(Napi::String::New(env, "UDPChecksum"), addr.UDPChecksum);
+		addrJs.Set(Napi::String::New(env, "Reserved1"), addr.Reserved1);
+		addrJs.Set(Napi::String::New(env, "Reserved2"), addr.Reserved2);
+
+		Napi::Object networkJS = Napi::Object::New(env);
+		networkJS.Set(Napi::String::New(env, "IfIdx"), addr.Network.IfIdx);
+		networkJS.Set(Napi::String::New(env, "SubIfIdx"), addr.Network.SubIfIdx);
+		addrJs.Set(Napi::String::New(env, "Network"), networkJS);
+
+		obj.Set(Napi::String::New(env, "addr"), addrJs);		
+		//Napi::HandleScope scope(Env());
+		Callback().Call({Env().Undefined(), obj});
+		}
+	private:
+		HANDLE handle;
+		UINT packetLen;
+		char packet[MAXBUF];
+		WINDIVERT_ADDRESS addr;
+};
+
+Napi::FunctionReference WinDivert::constructor;
+Napi::Object WinDivert::Init(Napi::Env env, Napi::Object exports) {
+  Napi::HandleScope scope(env);
+  Napi::Function func = DefineClass(env,"WinDivert",{InstanceMethod("open", &WinDivert::open),InstanceMethod("HelperCalcChecksums", &WinDivert::HelperCalcChecksums),InstanceMethod("recv", &WinDivert::recv),InstanceMethod("send", &WinDivert::send),InstanceMethod("close", &WinDivert::close)});
+
+  constructor = Napi::Persistent(func);
+  constructor.SuppressDestruct();
+
+  exports.Set("WinDivert", func);
+  return exports;
 }
 
-void HelperCalcChecksums(const FunctionCallbackInfo<Value>& args) {
-	Isolate* isolate = args.GetIsolate();  
-	size_t packetLen = Buffer::Length(args[0]);
-	char* packet = Buffer::Data(args[0]);
-	UINT res = WinDivertHelperCalcChecksums(packet, (UINT)packetLen, args[1]->IntegerValue());
-	args.GetReturnValue().Set(Buffer::New(isolate, packet, packetLen, myFree, NULL).ToLocalChecked());
-}
-
-WinDivert::WinDivert(std::string filter, WINDIVERT_LAYER layer, INT16 priority, UINT64 flags){	// : value_(value) {
-	handle = WinDivertOpen(filter.c_str(), layer, priority, flags);
-}
-
-WinDivert::~WinDivert() {
-	delete handle;
-	//delete &addr;
-}
-
-void WinDivert::Init(Local<Object> exports) {
-  Isolate* isolate = exports->GetIsolate();
-
-  // Prepare constructor template
-  Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate, New);
-  tpl->SetClassName(String::NewFromUtf8(isolate, "WinDivert"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-  // Prototype
-  NODE_SET_PROTOTYPE_METHOD(tpl, "setQueueLength", setQueueLength);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "getQueueLength", setQueueLength);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "setQueueTime", setQueueLength);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "getQueueTime", setQueueLength);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "recv", recv);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "send", send);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "close", close);
-
-  constructor.Reset(isolate, tpl->GetFunction());
-  exports->Set(String::NewFromUtf8(isolate, "open"), tpl->GetFunction());
-  NODE_SET_METHOD(exports, "HelperCalcChecksums", HelperCalcChecksums);
-  //exports->Set(String::NewFromUtf8(isolate, "HelperCalcChecksums"), HelperCalcChecksums);
-}
-
-void WinDivert::New(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-	v8::String::Utf8Value param1(args[0]->ToString());
-    WINDIVERT_LAYER layer = (WINDIVERT_LAYER)args[1]->IntegerValue();
-string filter =string(*param1);
-  if (args.IsConstructCall()) {
-    // Invoked as constructor: `new WinDivert(...)`
-    
-    WinDivert* obj = new WinDivert(filter, layer, (INT16)args[2]->IntegerValue(), (INT16)args[3]->IntegerValue());
-    obj->Wrap(args.This());
-    args.GetReturnValue().Set(args.This());
-  } else {
-    // Invoked as plain function `WinDivert(...)`, turn into construct call.
-    const int argc = 4;
-    Local<Value> argv[argc] = { args[0], args[1], args[2], args[3] };
-    Local<Function> cons = Local<Function>::New(isolate, constructor);
-    args.GetReturnValue().Set(cons->NewInstance(argc, argv));
-  }
-}
-
-void WinDivert::setQueueLength(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-  WinDivert* obj = ObjectWrap::Unwrap<WinDivert>(args.Holder());
-  args.GetReturnValue().Set(Boolean::New(isolate, WinDivertSetParam(obj->handle, WINDIVERT_PARAM_QUEUE_LEN, args[1]->IntegerValue())));
-}
-
-void WinDivert::getQueueLength(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-  WinDivert* obj = ObjectWrap::Unwrap<WinDivert>(args.Holder());
-  UINT64 queueLength;
-  WinDivertGetParam(obj->handle, WINDIVERT_PARAM_QUEUE_LEN, &queueLength);
-  args.GetReturnValue().Set(Number::New(isolate, (double)queueLength));
-}
-
-void WinDivert::setQueueTime(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-  WinDivert* obj = ObjectWrap::Unwrap<WinDivert>(args.Holder());
-  args.GetReturnValue().Set(Boolean::New(isolate, WinDivertSetParam(obj->handle, WINDIVERT_PARAM_QUEUE_TIME, args[1]->IntegerValue())));
-}
-
-void WinDivert::getQueueTime(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-  WinDivert* obj = ObjectWrap::Unwrap<WinDivert>(args.Holder());
-  UINT64 queueLength;
-  WinDivertGetParam(obj->handle, WINDIVERT_PARAM_QUEUE_TIME, &queueLength);
-  args.GetReturnValue().Set(Number::New(isolate, (double)queueLength));
-}
-
-void WinDivert::close(const FunctionCallbackInfo<Value>& args) {
-	Isolate* isolate = args.GetIsolate();  
-	WinDivert* obj = ObjectWrap::Unwrap<WinDivert>(args.Holder());
-	args.GetReturnValue().Set(Boolean::New(isolate, WinDivertClose(obj->handle)));
-}
-
-void WinDivert::send(const FunctionCallbackInfo<Value>& args) {
-	Isolate* isolate = args.GetIsolate();  
-	WinDivert* baseObj = ObjectWrap::Unwrap<WinDivert>(args.Holder());
-	
-    Local<Object> obj = args[0]->ToObject();
-    WINDIVERT_ADDRESS addr;
-    addr.IfIdx = (UINT32)obj->Get(String::NewFromUtf8(isolate, "address_ifIdx"))->IntegerValue();
-    addr.SubIfIdx = (UINT32)obj->Get(String::NewFromUtf8(isolate, "address_subIfIdx"))->IntegerValue();
-    addr.Direction = (UINT8)obj->Get(String::NewFromUtf8(isolate, "direction"))->IntegerValue();
-    
-    size_t packetLen = Buffer::Length(obj->Get(String::NewFromUtf8(isolate, "packet")));
-	char* packet = Buffer::Data(obj->Get(String::NewFromUtf8(isolate, "packet")));	
-
-	if(!WinDivertSend(baseObj->handle, packet, (UINT)packetLen, &addr, NULL)){
-		DWORD err = GetLastError();		
-		args.GetReturnValue().Set(Number::New(isolate, err));
+WinDivert::WinDivert(const Napi::CallbackInfo& info) : Napi::ObjectWrap<WinDivert>(info) {
+	Napi::Env env = info.Env();
+	Napi::HandleScope scope(env);
+	int argc = info.Length();
+	if (argc <= 0 || !info[0].IsString()) {
+		Napi::TypeError::New(env, "String filter expected").ThrowAsJavaScriptException();
+		return;
 	}
-	else{
-		args.GetReturnValue().Set(Boolean::New(isolate, true));
-	}
+	filter_ = info[0].As<Napi::String>().Utf8Value();
 }
 
-struct AsyncRecvData {
-	HANDLE handle;
-	Persistent<Function> callback;
-	UINT packetLen;
-	char packet[MAXBUF];
+Napi::Value WinDivert::recv(const Napi::CallbackInfo& info) {	
+  //cout << "recv" << endl;
+  Napi::Function callback = info[0].As<Napi::Function>();
+  RecvWorker* recvWorker = new RecvWorker(callback, this->handle_);
+  recvWorker->Queue();
+  return info.Env().Undefined();
+}
+
+Napi::Value WinDivert::open(const Napi::CallbackInfo& info) {
+	this->handle_ = WinDivertOpen(filter_.c_str(), (WINDIVERT_LAYER)0, 0, 0);		//Todo pass these args through , layer, priority, flags   filter_.c_str()
+	return info.Env().Undefined();
+}
+
+Napi::Value WinDivert::HelperCalcChecksums(const Napi::CallbackInfo& info) {
 	WINDIVERT_ADDRESS addr;
-  ~AsyncRecvData() {
-  	//free(&handle);
-    //free(&packet);
-    //free(&packetLen);
-    //delete addr;
-    callback.Reset();
-  }
-};
-
-void recvAsync(uv_work_t* req) {
-	auto data = reinterpret_cast<AsyncRecvData*>(req->data);
-    UINT packetLen;
-	if (WinDivertRecv(data->handle, data->packet, sizeof(data->packet), &(data->addr), &packetLen)){
-		data->packetLen = packetLen;
+	int argc = info.Length();
+	if (argc <= 1 || !info[0].IsObject() || !info[1].IsNumber()) {
+		Napi::TypeError::New(info.Env(), "Object expected").ThrowAsJavaScriptException();
+		return info.Env().Undefined();
 	}
-	else{
-	cout << "Recv Error, Are you running as administrator?" << endl;
-	}
-};
-
-void afterRecvAsync(uv_work_t* req, int status) {	
-	Isolate* isolate = Isolate::GetCurrent();
-	HandleScope scope(isolate);
-	auto data = reinterpret_cast<AsyncRecvData*>(req->data);
-	WINDIVERT_ADDRESS addr = data->addr;
-
-	Local<Object> obj = Object::New(isolate);	
-    obj->Set(String::NewFromUtf8(isolate, "packet"), Buffer::New(isolate, (char*)data->packet, (size_t)data->packetLen, myFree, NULL).ToLocalChecked());
-    obj->Set(String::NewFromUtf8(isolate, "address_ifIdx"), Number::New(isolate, addr.IfIdx));
-	obj->Set(String::NewFromUtf8(isolate, "address_subIfIdx"), Number::New(isolate, addr.SubIfIdx));
-	obj->Set(String::NewFromUtf8(isolate, "direction"), Number::New(isolate, addr.Direction));
-	obj->Set(String::NewFromUtf8(isolate, "length"), Number::New(isolate, data->packetLen)); 
-	Local<Value> argv[1] = {obj};
-	Local<Function> callback = Local<Function>::New(isolate, data->callback);
-	callback->Call(isolate->GetCurrentContext()->Global(), 1, argv);
-	req->data = 0;
-	delete data;
-	
+	Napi::Object packetData = info[0].As<Napi::Object>();
+	Napi::Buffer<char> packet = packetData.Get("packet").As<Napi::Buffer<char>>();
+	return Napi::Boolean::New(info.Env(), WinDivertHelperCalcChecksums(packet.Data(), packet.Length(), &addr, info[1].As<Napi::Number>().Uint32Value()));
 }
 
-void WinDivert::recv(const FunctionCallbackInfo<Value>& args) {
-	uv_work_t* req = new uv_work_t;
-	AsyncRecvData* data = new AsyncRecvData;
+Napi::Value WinDivert::send(const Napi::CallbackInfo& info) {
+	WINDIVERT_ADDRESS addr;
+	WINDIVERT_DATA_NETWORK network;
+	int argc = info.Length();
+	if (argc <= 0 || !info[0].IsObject()) {
+		Napi::TypeError::New(info.Env(), "Object expected").ThrowAsJavaScriptException();
+		return info.Env().Undefined();
+	}
 	
-	Isolate* isolate = args.GetIsolate(); 
-	WinDivert* obj = ObjectWrap::Unwrap<WinDivert>(args.Holder());
-	
-	req->data = data;
-	data->handle = obj->handle;
-	
-	Local<Function> callback = Local<Function>::Cast(args[0]);
-    data->callback.Reset(isolate, callback);
-	
-	//Local<Function> cb = Local<Function>::Cast(args[0]);
-	//data->callback = v8::Persistent<v8::Function>::Cast(cb);
-	uv_queue_work(uv_default_loop(), req, recvAsync, afterRecvAsync);
+	Napi::Object packetData = info[0].As<Napi::Object>();
+	Napi::Buffer<char> packet = packetData.Get("packet").As<Napi::Buffer<char>>();
+	Napi::Object addrJS = packetData.Get("addr").As<Napi::Object>();
+	Napi::Object networkJS = addrJS.Get("Network").As<Napi::Object>();
+	addr.Timestamp = addrJS.Get("Timestamp").As<Napi::Number>().Int64Value();
+	addr.Layer = addrJS.Get("Layer").As<Napi::Number>().Uint32Value();
+	addr.Event = addrJS.Get("Event").As<Napi::Number>().Uint32Value();
+	addr.Sniffed = addrJS.Get("Sniffed").As<Napi::Number>().Uint32Value();
+	addr.Outbound = addrJS.Get("Outbound").As<Napi::Number>().Uint32Value();
+	addr.Loopback = addrJS.Get("Loopback").As<Napi::Number>().Uint32Value();
+	addr.Impostor = addrJS.Get("Impostor").As<Napi::Number>().Uint32Value();
+	addr.IPv6 = addrJS.Get("IPv6").As<Napi::Number>().Uint32Value();
+	addr.IPChecksum = addrJS.Get("IPChecksum").As<Napi::Number>().Uint32Value();
+	addr.TCPChecksum = addrJS.Get("TCPChecksum").As<Napi::Number>().Uint32Value();
+	addr.UDPChecksum = addrJS.Get("UDPChecksum").As<Napi::Number>().Uint32Value();
+	addr.Reserved1 = addrJS.Get("Reserved1").As<Napi::Number>().Uint32Value();
+	addr.Reserved2 = addrJS.Get("Reserved2").As<Napi::Number>().Uint32Value();
+	network.IfIdx = networkJS.Get("IfIdx").As<Napi::Number>().Uint32Value();
+	network.SubIfIdx = networkJS.Get("SubIfIdx").As<Napi::Number>().Uint32Value();
+	addr.Network = network;
+
+	UINT pSendLen;
+	return Napi::Boolean::New(info.Env(), WinDivertSend(this->handle_, packet.Data(), packet.Length(), &pSendLen, &addr));
 }
 
-NODE_MODULE(addon, WinDivert::Init)
+Napi::Value WinDivert::close(const Napi::CallbackInfo& info) {
+	return Napi::Boolean::New(info.Env(), WinDivertClose(this->handle_));
+}
 
-}  // namespace demo
+Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
+  return WinDivert::Init(env, exports);
+}
+NODE_API_MODULE(addon, InitAll)

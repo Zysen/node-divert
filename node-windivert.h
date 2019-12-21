@@ -1,3 +1,44 @@
+#ifndef WINDIVERT_H_
+#define WINDIVERT_H_
+
+#include <napi.h>
+#include <iostream>
+#include "windivert.h"
+
+#define MAXBUF  0xFFFF
+
+using namespace std;
+
+class WinDivert : public Napi::ObjectWrap<WinDivert> {
+	public:
+		static WINDIVERT_ADDRESS addr;
+		static Napi::Object Init(Napi::Env env, Napi::Object exports);
+		WinDivert(const Napi::CallbackInfo& info);
+		virtual ~WinDivert() {
+					cout << "destroy" << endl;
+		}
+	private:
+		static Napi::FunctionReference constructor;
+
+		Napi::Value open(const Napi::CallbackInfo& info);
+		Napi::Value recv(const Napi::CallbackInfo& info);
+		Napi::Value close(const Napi::CallbackInfo& info);
+		Napi::Value WinDivert::send(const Napi::CallbackInfo& info);
+		Napi::Value WinDivert::HelperCalcChecksums(const Napi::CallbackInfo& info);
+		
+		string filter_;
+		Napi::String filter2_;
+		HANDLE handle_;
+		
+		
+};
+
+
+
+#endif
+
+
+/*
 #include <node.h>
 #include <node_object_wrap.h>
 #include <string>
@@ -27,3 +68,22 @@ WINDIVERT_ADDRESS addr;
 };
 
 } 
+*/
+
+
+/*
+
+// ...
+Napi::Value Exectute(const Napi::CallbackInfo& info) {
+ // Retrieve the buffer
+ Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
+// continue to use the buffer ...
+}
+
+// Addon initialization code
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+  exports["execute"] = Napi::Function::New(env, Execute);
+  return exports;
+}
+NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
+*/

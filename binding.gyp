@@ -6,21 +6,30 @@
                'target_arch=="ia32"',
                {  
                   'target_name':'windivert',
-                  'sources':[  
-                     'windivert.cc'
-                  ],
+                  'sources':['windivert.cc'],
                   'libraries':[  
-                     "../WinDivert-1.1.8-MSVC/x86/WinDivert.lib"
+                     "../bin/x64/windivert.lib"
                   ],
                   'copies':[  
                      {  
                         'destination':'build/Release',
                         'files':[  
-                           'WinDivert-1.1.8-MSVC/x86/WinDivert64.sys',
-                           'WinDivert-1.1.8-MSVC/x86/WinDivert.dll'
+                           'bin/x86/WinDivert64.sys',
+                           'bin/x86/WinDivert.dll'
                         ]
                      }
-                  ]
+                  ],
+				  "msbuild_settings": {
+						"Link": {
+							"ImageHasSafeExceptionHandlers": "false"
+						}
+					},
+					"cflags!": [ "-fno-exceptions" ],
+				"cflags_cc!": [ "-fno-exceptions" ],
+				"include_dirs": [
+				"<!@(node -p \"require('node-addon-api').include\")"
+				],
+				'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ]
                }
             ],
             [  
@@ -30,18 +39,24 @@
                   'sources':[  
                      'windivert.cc'
                   ],
-                  'libraries':[  
-                     "../WinDivert-1.1.8-MSVC/amd64/WinDivert.lib"
+                  'libraries':[
+						"../bin/x64/windivert.lib"
                   ],
                   'copies':[  
                      {  
                         'destination':'build/Release',
                         'files':[  
-                           'WinDivert-1.1.8-MSVC/amd64/WinDivert64.sys',
-                           'WinDivert-1.1.8-MSVC/amd64/WinDivert.dll'
+                           'bin/x64/WinDivert64.sys',
+                           'bin/x64/WinDivert.dll'
                         ]
                      }
-                  ]
+                  ],
+				"cflags!": [ "-fno-exceptions" ],
+				"cflags_cc!": [ "-fno-exceptions" ],
+				"include_dirs": [
+				"<!@(node -p \"require('node-addon-api').include\")"
+				],
+				'defines': [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ]
                }
             ]
          ]

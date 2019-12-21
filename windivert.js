@@ -1,22 +1,17 @@
-var fs = require("fs");
-var wd = (fs.existsSync(__dirname+"/build/Release/windivert.node"))?require(__dirname+"/build/Release/windivert.node"):require(__dirname+'/bin/'+process.arch+'/windivert.node');
-
+var wd = require('bindings')('WinDivert');
 wd.decoders = require('./decoders.js');
-
 wd.listen = function(filter, cb, handleClose){
 	handleClose = handleClose || true;
-	var handle = wd.open(filter, 0, 0, 0);
+	var handle = new wd.WinDivert(filter, 0, 0, 0);
+	handle.open();
 	(function recvLoop(){
-		handle.recv(function(data){
-			data.packet = new Buffer(data.packet);
-			var ret = cb(data.packet, data.direction===1?true:false, data);
+		handle.recv(function(err, data){
+			var ret = cb(data.packet, data.addr);
 			if(Buffer.isBuffer(ret)){
-				data.packet = ret;
-				//console.log("Sending a BUFFER!", ret.toString());
+				handle.HelperCalcChecksums(data, 0);	
 				handle.send(data);
 			}
 			else if(ret!==false){
-				//console.log("Sending Original");
 				handle.send(data);
 			}
 			recvLoop();
