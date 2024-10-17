@@ -1,28 +1,35 @@
 {
-  "name": "windivert",
-  "version": "1.0.0",
-  "description": "Node Bindings for Divert, currently only supports windows.",
-  "keywords": [
-    "deep packet inspection",
-    "packet filtering",
-    "packet blocking",
-    "firewall",
-    "packet crafting",
-    "packet modification"
-  ],
-  "license":"MIT",
-  "cpu" : [ "x64", "ia32" ],
-  "os" : [ "win32"],
-  "main": "windivert.js",
-  "private": false,
-  "gypfile": true,
-  "dependencies": {
-    "bindings": "~1.2.1",
-    "node-addon-api": "^1.0.0"
-  },
-  "repository" :
-  {
-  "type" : "git",
-  "url" : "https://github.com/Zysen/node-divert"
-  }
+	"name": "windivert",
+	"version": "1.1.0",
+	"description": "Node Bindings for Divert, currently only supports windows.",
+	"keywords": [
+		"deep packet inspection",
+		"packet filtering",
+		"packet blocking",
+		"firewall",
+		"packet crafting",
+		"packet modification"
+	],
+	"license": "MIT",
+	"cpu": [
+		"x86",
+		"x64"
+	],
+	"os": [
+		"win32"
+	],
+	"main": "windivert.js",
+	"private": false,
+	"gypfile": true,
+	"scripts": {
+		"build": "node-gyp rebuild binding.gyp"
+	},
+	"dependencies": {
+		"bindings": "^1.5.0",
+		"node-addon-api": "^8.2.1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Zysen/node-divert"
+	}
 }

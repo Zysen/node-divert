@@ -1,3 +1,5 @@
 build/
-WinDivert-1.1.8-MSVC*
 .project
+yarn.lock
+node_modules/
+windivertlib/

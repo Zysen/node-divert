@@ -1,0 +1,8 @@
+{
+	"C_Cpp.errorSquiggles": "disabled",
+	"files.associations": {
+		"format": "cpp",
+		"xlocinfo": "cpp",
+		"xstring": "cpp"
+	}
+}

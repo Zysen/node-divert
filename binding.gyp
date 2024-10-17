@@ -3,19 +3,19 @@
       {  
          'conditions':[  
             [  
-               'target_arch=="ia32"',
+               'target_arch=="x86"',
                {  
                   'target_name':'windivert',
                   'sources':['windivert.cc'],
                   'libraries':[  
-                     "../bin/x64/windivert.lib"
+                     "../windivertlib/x86/windivert.lib"
                   ],
                   'copies':[  
                      {  
                         'destination':'build/Release',
                         'files':[  
-                           'bin/x86/WinDivert64.sys',
-                           'bin/x86/WinDivert.dll'
+                           'windivertlib/x86/WinDivert32.sys',
+                           'windivertlib/x86/WinDivert.dll'
                         ]
                      }
                   ],
@@ -40,14 +40,14 @@
                      'windivert.cc'
                   ],
                   'libraries':[
-						"../bin/x64/windivert.lib"
+						"../windivertlib/x64/windivert.lib"
                   ],
                   'copies':[  
                      {  
                         'destination':'build/Release',
                         'files':[  
-                           'bin/x64/WinDivert64.sys',
-                           'bin/x64/WinDivert.dll'
+                           'windivertlib/x64/WinDivert64.sys',
+                           'windivertlib/x64/WinDivert.dll'
                         ]
                      }
                   ],

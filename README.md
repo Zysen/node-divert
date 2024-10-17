@@ -45,7 +45,7 @@ See the windivert readme: https://github.com/basil00/Divert/blob/master/README
 4. Building
 ---------------
 	1) Make sure node-gyp is installed and working. Instructions are here: https://github.com/nodejs/node-gyp
-	2) Download WinDivert-1.1.8-MSVC.zip from https://reqrypt.org/windivert.html and extract its contents into the module directory. 
+	2) Download WinDivert Version 2.2.2 build from https://github.com/basil00/WinDivert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip and extract its contents into the folder `windivertlib`. 
 	3) node-gyp clean configure build
 	4) Windivert will automatically use the custom built binary from build/Release if it exists, instead of the precompiled binaries in ./bin
 	
