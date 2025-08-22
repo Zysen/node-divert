@@ -4,88 +4,14 @@ class RecvWorker : public Napi::AsyncWorker {
 	public:
 		RecvWorker(Napi::Function& callback, HANDLE handle) : Napi::AsyncWorker(callback), handle(handle) {}
 		~RecvWorker() {}
-		void Execute() {
-			//cout << "WinDivertRecv" << endl;
-			if(!WinDivertRecv(handle, packet, sizeof(packet), &packetLen, &addr)){
-				Napi::TypeError::New(Env(), "Exception during WinDivertRecv\nAre you running as administrator?").ThrowAsJavaScriptException();
-			}
-			//cout << "WinDivertRecv packetLen " << packetLen << " Packet=" << packet << endl;
-		}
-		void OnOK() {
-
-	/*
-typedef struct
-{
-    INT64  Timestamp;                 Packet's timestamp. 
-    UINT32 Layer:8;                      Packet's layer.
-    UINT32 Event:8;                      Packet event. 
-    UINT32 Sniffed:1;                   Packet was sniffed? 
-    UINT32 Outbound:1;                  Packet is outound? 
-    UINT32 Loopback:1;                   Packet is loopback? 
-    UINT32 Impostor:1;                   Packet is impostor? 
-    UINT32 IPv6:1;                      Packet is IPv6? *
-    UINT32 IPChecksum:1;                Packet has valid IPv4 checksum? 
-    UINT32 TCPChecksum:1;                Packet has valid TCP checksum? 
-    UINT32 UDPChecksum:1;                Packet has valid UDP checksum? 
-    UINT32 Reserved1:8;
-    UINT32 Reserved2;
-    union
-    {
-        WINDIVERT_DATA_NETWORK Network;  Network layer data. 
-        WINDIVERT_DATA_FLOW Flow;       Flow layer data. 
-        WINDIVERT_DATA_SOCKET Socket;    Socket layer data. 
-        WINDIVERT_DATA_REFLECT Reflect;  Reflect layer data. 
-        UINT8 Reserved3[64];
-    };
-} WINDIVERT_ADDRESS, *PWINDIVERT_ADDRESS;
-
-typedef struct
-{
-    UINT32 IfIdx;                        Packet's interface index. 
-    UINT32 SubIfIdx;                     Packet's sub-interface index. 
-} WINDIVERT_DATA_NETWORK, *PWINDIVERT_DATA_NETWORK;
-
-
-typedef struct
-{
-    UINT64 EndpointId;                   Endpoint ID. 
-    UINT64 ParentEndpointId;             Parent endpoint ID. 
-    UINT32 ProcessId;                    Process ID. 
-    UINT32 LocalAddr[4];                 Local address. 
-    UINT32 RemoteAddr[4];                Remote address. 
-    UINT16 LocalPort;                    Local port. 
-    UINT16 RemotePort;                   Remote port. 
-    UINT8  Protocol;                     Protocol. 
-} WINDIVERT_DATA_FLOW, *PWINDIVERT_DATA_FLOW;
-
- WinDivert SOCKET layer data.
- 
-typedef struct
-{
-    UINT64 EndpointId;                   Endpoint ID. 
-    UINT64 ParentEndpointId;             Parent Endpoint ID. 
-    UINT32 ProcessId;                    Process ID. 
-    UINT32 LocalAddr[4];                 Local address. 
-    UINT32 RemoteAddr[4];                Remote address. 
-    UINT16 LocalPort;                    Local port. 
-    UINT16 RemotePort;                   Remote port. 
-    UINT8  Protocol;                     Protocol. 
-} WINDIVERT_DATA_SOCKET, *PWINDIVERT_DATA_SOCKET;
-
-
- WinDivert REFLECTION layer data.
- 
-typedef struct
-{
-    INT64  Timestamp;                    Handle open time. 
-    UINT32 ProcessId;                    Handle process ID. 
-    WINDIVERT_LAYER Layer;               Handle layer. 
-    UINT64 Flags;                        Handle flags. 
-    INT16  Priority;                     Handle priority. 
-} WINDIVERT_DATA_REFLECT, *PWINDIVERT_DATA_REFLECT;
-*/
-
-
+                void Execute() override {
+                        //cout << "WinDivertRecv" << endl;
+                        if(!WinDivertRecv(handle, packet, sizeof(packet), &packetLen, &addr)){
+                                SetError("Exception during WinDivertRecv\nAre you running as administrator?");
+                        }
+                        //cout << "WinDivertRecv packetLen " << packetLen << " Packet=" << packet << endl;
+                }
+                void OnOK() override {
 		Napi::Env env = Env();
 
 		Napi::Object obj = Napi::Object::New(env);
@@ -110,15 +36,18 @@ typedef struct
 		networkJS.Set(Napi::String::New(env, "SubIfIdx"), addr.Network.SubIfIdx);
 		addrJs.Set(Napi::String::New(env, "Network"), networkJS);
 
-		obj.Set(Napi::String::New(env, "addr"), addrJs);		
-		//Napi::HandleScope scope(Env());
-		Callback().Call({Env().Undefined(), obj});
-		}
-	private:
-		HANDLE handle;
-		UINT packetLen;
-		char packet[MAXBUF];
-		WINDIVERT_ADDRESS addr;
+                obj.Set(Napi::String::New(env, "addr"), addrJs);
+                //Napi::HandleScope scope(Env());
+                Callback().Call({Env().Undefined(), obj});
+                }
+                void OnError(const Napi::Error& e) override {
+                        Callback().Call({e.Value(), Env().Undefined()});
+                }
+        private:
+                HANDLE handle;
+                UINT packetLen;
+                char packet[MAXBUF];
+                WINDIVERT_ADDRESS addr;
 };
 
 Napi::FunctionReference WinDivert::constructor;

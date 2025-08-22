@@ -1,10 +1,9 @@
 //Decoders.js taken from the Cap project: https://github.com/mscdex/cap
 
 // Link Layer Protocols ========================================================
-exports.Ethernet = function(b, offset) {
-  offset || (offset = 0);
-  var i;
-  var ret = {
+exports.Ethernet = (b, offset = 0) => {
+  let i;
+  const ret = {
     info: {
       dstmac: '',
       srcmac: '',
@@ -44,7 +43,7 @@ exports.Ethernet = function(b, offset) {
   }
 
   // 16-bit Type/Length
-  var typelen = b.readUInt16BE(offset, true);
+  const typelen = b.readUInt16BE(offset, true);
   if (typelen <= 1500)
     ret.info.length = typelen;
   else if (typelen >= 1536)
@@ -56,10 +55,10 @@ exports.Ethernet = function(b, offset) {
 
 // Internet Layer Protocols ====================================================
 
-exports.IPV4 = function(b, offset) {
-  offset || (offset = 0);
-  var origoffset = offset, i;
-  var ret = {
+exports.IPV4 = (b, offset = 0) => {
+  const origoffset = offset;
+  let i;
+  const ret = {
     info: {
       hdrlen: undefined,
       dscp: undefined,
@@ -142,7 +141,7 @@ exports.IPV4 = function(b, offset) {
   return ret;
 };
 
-var IPV6_EXTENSIONS = {
+const IPV6_EXTENSIONS = {
   0: 'Hop-by-Hop Options',
   43: 'Routing',
   44: 'Fragment',
@@ -153,10 +152,9 @@ var IPV6_EXTENSIONS = {
   135: 'Mobility'
 };
 
-exports.IPV6 = function(b, offset) {
-  offset || (offset = 0);
-  var i;
-  var ret = {
+exports.IPV6 = (b, offset = 0) => {
+  let i;
+  const ret = {
     info: {
       class: undefined,
       flowLabel: undefined,
@@ -184,7 +182,9 @@ exports.IPV6 = function(b, offset) {
   offset += 2;
 
   // 8-bit Next Header
-  var nextHeader = b[offset++], curHeader = nextHeader, hdrExtLen;
+  let nextHeader = b[offset++];
+  let curHeader = nextHeader;
+  let hdrExtLen;
 
   // 8-bit Hop Limit
   ret.info.hopLimit = b[offset++];
@@ -237,11 +237,10 @@ exports.IPV6 = function(b, offset) {
   return ret;
 };
 
-exports.ICMPV4 = function(b, nbytes, offset) {
-  offset || (offset = 0);
-  var type, code, checksum, i, j;
+exports.ICMPV4 = (b, nbytes, offset = 0) => {
+  let type, code, checksum, i, j;
 
-  var ret = {
+  const ret = {
     info: undefined,
     offset: undefined
   };
@@ -256,7 +255,7 @@ exports.ICMPV4 = function(b, nbytes, offset) {
   checksum = b.readUInt16BE(offset, true);
   offset += 2;
 
-  var IPhdr, addr;
+  let IPhdr, addr;
   if (type === 0 || type === 15 || type === 16 || type === 37) {
     // Echo reply / Information request / Information reply
     // / Domain name request
@@ -284,7 +283,7 @@ exports.ICMPV4 = function(b, nbytes, offset) {
     offset += 2; // skip unused part
 
     // 16-bit Next-hop MTU
-    var mtu = b.readUInt16BE(offset, true);
+    const mtu = b.readUInt16BE(offset, true);
     offset += 2;
 
     // IPv4 Header
@@ -350,7 +349,7 @@ exports.ICMPV4 = function(b, nbytes, offset) {
   } else if (type === 12 || type === 31 || type === 40) {
     // Parameter problem / Conversion error / Security failure
 
-    var ptr;
+    let ptr;
     if (type === 12) {
       // 8-bit Pointer
       ptr = b[offset++];
@@ -390,16 +389,16 @@ exports.ICMPV4 = function(b, nbytes, offset) {
     // Router advertisement
 
     // 8-bit Number of Addresses
-    var nAddrs = b[offset++];
+    const nAddrs = b[offset++];
 
     // 8-bit Address Entry Size (2 for ICMPv4)
-    var entrySize = b[offset++];
+    const entrySize = b[offset++];
 
     // 16-bit Lifetime
-    var lifetime = b.readUInt16BE(offset, true);
+    const lifetime = b.readUInt16BE(offset, true);
     offset += 2;
 
-    var addrs;
+    let addrs;
     if (nAddrs > 0 && entrySize === 2) {
       addrs = new Array(nAddrs);
       for (i = 0; i < nAddrs; ++i) {
@@ -578,7 +577,8 @@ exports.ICMPV4 = function(b, nbytes, offset) {
     ret.info.ttl = b.readInt32BE(offset, true);
     offset += 2;
     if (offset < nbytes) {
-      var names = [], length, ptr;
+      const names = [];
+      let length, ptr;
       while (true) {
         // 8-bit Length
         length = b[offset++];
@@ -603,10 +603,9 @@ exports.ICMPV4 = function(b, nbytes, offset) {
 
 // Transport Layer Protocols ===================================================
 
-exports.TCP = function(b, offset) {
-  offset || (offset = 0);
-  var origoffset = offset;
-  var ret = {
+exports.TCP = (b, offset = 0) => {
+  const origoffset = offset;
+  const ret = {
     info: {
       srcport: undefined,
       dstport: undefined,
@@ -639,7 +638,7 @@ exports.TCP = function(b, offset) {
   offset += 4;
 
   // 4-bit Data Offset
-  var dataoffset = ((b[offset] & 0xF0) >> 4);
+  const dataoffset = ((b[offset] & 0xF0) >> 4);
 
   // 3-bit Reserved (skip)
 
@@ -669,32 +668,8 @@ exports.TCP = function(b, offset) {
   return ret;
 };
 
-/*
- *   var origoffset = offset, i;
-  var ret = {
-    info: {
-      hdrlen: undefined,
-      dscp: undefined,
-      ecn: undefined,
-      totallen: undefined,
-      id: undefined,
-      flags: undefined,
-      fragoffset: undefined,
-      ttl: undefined,
-      protocol: undefined,
-      hdrchecksum: undefined,
-      srcaddr: '',
-      dstaddr: '',
-      options: undefined
-    },
-    hdrlen: undefined,
-    offset: undefined
-  };
- */
-
-exports.UDP = function(b, offset) {
-  offset || (offset = 0);
-  var ret = {
+exports.UDP = (b, offset = 0) => {
+  const ret = {
     info: {
       srcport: undefined,
       dstport: undefined,
@@ -721,26 +696,12 @@ exports.UDP = function(b, offset) {
   offset += 2;
 
   ret.offset = offset;
-  
-	ret.info.totalLength = ret.info.length+8;
-  
-	var max = 0xFFFF;
-	function myAdd(total, x) {
-		total += x;
-		if (total > max) {
-			total = total & 0xffff;
-			total++;
-		}
-		return total;	
-		//return total + x;
-		//return total;
-	}
+  ret.info.totalLength = ret.info.length + 8;
   return ret;
 };
 
-exports.SCTP = function(b, nbytes, offset) {
-  offset || (offset = 0);
-  var ret = {
+exports.SCTP = (b, nbytes, offset = 0) => {
+  const ret = {
     info: {
       srcport: undefined,
       dstport: undefined,
@@ -764,7 +725,8 @@ exports.SCTP = function(b, nbytes, offset) {
   offset += 2;
 
   if (offset < nbytes) {
-    var chunks = [], type, flags, length;
+    const chunks = [];
+    let type, flags, length;
     while (offset < nbytes) {
       // 8-bit Chunk Type
       type = b[offset++];
@@ -1034,6 +996,6 @@ exports.PROTOCOL = {
     'ROHC': 142 // Robust Header Compression                           [RFC5858]
   }
 };
-for (var category in exports.PROTOCOL)
-  for (var protocol in exports.PROTOCOL[category])
+for (const category in exports.PROTOCOL)
+  for (const protocol in exports.PROTOCOL[category])
     exports.PROTOCOL[category][exports.PROTOCOL[category][protocol]] = protocol;
