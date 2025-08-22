@@ -1,51 +1,51 @@
-node-windivert: NodeJS bindings for WinDivert
-====================================
+# node-windivert: Node.js bindings for WinDivert
 
-1. Introduction
----------------
-This module provides NodeJS bindings for the WinDivert project. WinDivert provides packet sniffing, modification, injection and blocking for windows.
-WinDivert: https://reqrypt.org/windivert.html
+## Introduction
+This module provides Node.js bindings for the [WinDivert](https://reqrypt.org/windivert.html) project. WinDivert enables packet sniffing, modification, injection and blocking on Windows.
 
-See the windivert readme: https://github.com/basil00/Divert/blob/master/README
+The addon targets modern Node.js releases (20 and later) using the latest [`node-addon-api`](https://github.com/nodejs/node-addon-api) and is compatible with Node.js 24.
 
-2. Usage
----------------
-	npm install windivert
-	
-	var wd = require("windivert");
-	wd.listen("tcp.DstPort==80 or tcp.SrcPort==80", function(data, inbound){
-		console.log("HTTP packet with length", data.length);
-	});
-	
-3. Other Examples
----------------
+## Installation
+```bash
+npm install windivert
+```
+Prebuilt binaries for WinDivert are bundled in `bin/<arch>` and are used by default. If no matching binary is available, the install step will compile the addon using [`node-gyp-build`](https://github.com/prebuild/node-gyp-build`).
 
-	//Block Packet	
-	var wd = require("windivert");
-	wd.listen("tcp.DstPort==80 or tcp.SrcPort==80", function(data, inbound){
-		console.log("BLOCKED HTTP packet with length", data.length);
-		return false;
-	});
+## Usage
+```js
+const wd = require('windivert');
+wd.listen('tcp.DstPort==80 or tcp.SrcPort==80', (data, inbound) => {
+  console.log('HTTP packet with length', data.length);
+});
+```
 
-	//Modify Packet
-	require("buffertools").extend();
-	var wd = require("windivert");
-	wd.listen("tcp.DstPort==80 or tcp.SrcPort==80", function(data, inbound){	//inbound is bool
-		var d = new Buffer(data);
-		console.log(data.length);
-		var i = d.indexOf(new Buffer("BOB"));
-		if(i>=0){
-			d.writeUInt8("S".charCodeAt(0), i++);
-			d.writeUInt8("A".charCodeAt(0), i++);
-			d.writeUInt8("M".charCodeAt(0), i++);
-		}
-		return wd.HelperCalcChecksums(d, 0);
-	});
-	
-4. Building
----------------
-	1) Make sure node-gyp is installed and working. Instructions are here: https://github.com/nodejs/node-gyp
-	2) Download WinDivert-1.1.8-MSVC.zip from https://reqrypt.org/windivert.html and extract its contents into the module directory. 
-	3) node-gyp clean configure build
-	4) Windivert will automatically use the custom built binary from build/Release if it exists, instead of the precompiled binaries in ./bin
-	
+### Other examples
+```js
+// Block a packet
+const wd = require('windivert');
+wd.listen('tcp.DstPort==80 or tcp.SrcPort==80', (data) => {
+  console.log('BLOCKED HTTP packet with length', data.length);
+  return false;
+});
+```
+
+```js
+// Modify a packet
+require('buffertools').extend();
+const wd = require('windivert');
+wd.listen('tcp.DstPort==80 or tcp.SrcPort==80', (data) => {
+  const d = Buffer.from(data);
+  const i = d.indexOf(Buffer.from('BOB'));
+  if (i >= 0) {
+    d.writeUInt8('S'.charCodeAt(0), i + 0);
+    d.writeUInt8('A'.charCodeAt(0), i + 1);
+    d.writeUInt8('M'.charCodeAt(0), i + 2);
+  }
+  return wd.HelperCalcChecksums(d, 0);
+});
+```
+
+## Building from source
+1. Ensure [`node-gyp`](https://github.com/nodejs/node-gyp) is installed and working.
+2. Download the WinDivert SDK and extract the required DLL, SYS and LIB files into `bin/<arch>`.
+3. Run `npm install` to build. The module will automatically use the custom build from `build/Release` if it exists; otherwise the bundled binaries in `bin` are used.
