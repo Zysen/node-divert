@@ -77,14 +77,14 @@ class WinDivert : public Napi::ObjectWrap<WinDivert> {
 		 * @param info Contains packet data and address
 		 * @return Boolean indicating success
 		 */
-		Napi::Value WinDivert::send(const Napi::CallbackInfo& info);
+		Napi::Value send(const Napi::CallbackInfo& info);
 
 		/**
 		 * @brief Calculates packet checksums
 		 * @param info Contains packet and flags
 		 * @return Object with calculated checksums
 		 */
-		Napi::Value WinDivert::HelperCalcChecksums(const Napi::CallbackInfo& info);
+		Napi::Value HelperCalcChecksums(const Napi::CallbackInfo& info);
 
 		/**
 		 * @brief Starts the packet receiving thread

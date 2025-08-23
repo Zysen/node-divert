@@ -130,6 +130,7 @@ See `examples/goodbyeDPI.js` for a comprehensive example of Deep Packet Inspecti
 ### Prerequisites
 1. Ensure node-gyp is installed and properly configured
    - Follow installation instructions at: https://github.com/nodejs/node-gyp
+2. Install Visual Studio build tools https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 ### Build Steps
 1. Download WinDivert-2.2.2-A.zip from https://reqrypt.org/windivert.html
