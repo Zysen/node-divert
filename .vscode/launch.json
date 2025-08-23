@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Launch Program",
+      "preLaunchTask": "npm: build:dev",
+      "program": "${env:HOME}/AppData/Roaming/nvm/v20.18.0/node",
+      "args": [
+        "./examples/goodbyeDPI.js"
+      ]
+    },
+    {
+      "name": "Launch via NPM",
+      "request": "launch",
+      "runtimeArgs": [
+        "run-script",
+        "test"
+      ],
+      "runtimeExecutable": "npm",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    }
+  ]
+}

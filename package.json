@@ -1,7 +1,15 @@
 {
   "name": "windivert",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node Bindings for Divert, currently only supports windows.",
+  "scripts": {
+   "test": "node ./examples/goodbyeDPI.js",
+   "build:dev": "node-gyp build --debug",
+   "build": "node-gyp build",
+   "rebuild:dev": "node-gyp rebuild --debug",
+   "rebuild": "node-gyp rebuild",
+   "clean": "node-gyp clean"
+  },
   "keywords": [
     "deep packet inspection",
     "packet filtering",
@@ -10,19 +18,24 @@
     "packet crafting",
     "packet modification"
   ],
-  "license":"MIT",
-  "cpu" : [ "x64", "ia32" ],
-  "os" : [ "win32"],
+  "license": "MIT",
+  "cpu": [
+    "x64",
+    "ia32"
+  ],
+  "os": [
+    "win32"
+  ],
   "main": "windivert.js",
   "private": false,
   "gypfile": true,
   "dependencies": {
-    "bindings": "~1.2.1",
-    "node-addon-api": "^1.0.0"
+    "bindings": "^1.5.0",
+    "is-admin": "^4.0.0",
+    "node-addon-api": "^8.3.0"
   },
-  "repository" :
-  {
-  "type" : "git",
-  "url" : "https://github.com/Zysen/node-divert"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Zysen/node-divert"
   }
 }

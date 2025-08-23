@@ -1,89 +1,113 @@
+/**
+ * @file node-windivert.h
+ * @brief Node.js Native Add-on Header for WinDivert
+ * 
+ * This header file defines the interface between Node.js and the WinDivert driver,
+ * providing functionality for packet interception and modification on Windows systems.
+ */
+
 #ifndef WINDIVERT_H_
 #define WINDIVERT_H_
 
+#define NAPI_VERSION 4
 #include <napi.h>
 #include <iostream>
 #include "windivert.h"
+#include <thread>
+#include <atomic>
+#include <codecvt>
 
-#define MAXBUF  0xFFFF
+#define MAXBUF  WINDIVERT_MTU_MAX
 
 using namespace std;
 
+/**
+ * @class WinDivert
+ * @brief Main class for WinDivert functionality in Node.js
+ * 
+ * This class wraps the WinDivert driver functionality and exposes it to Node.js
+ * through N-API. It provides methods for intercepting, modifying, and injecting
+ * network packets.
+ */
 class WinDivert : public Napi::ObjectWrap<WinDivert> {
 	public:
-		static WINDIVERT_ADDRESS addr;
+		/**
+		 * @brief Initializes the WinDivert module
+		 * @param env The Node.js environment
+		 * @param exports The exports object to attach the module to
+		 * @return The modified exports object
+		 */
 		static Napi::Object Init(Napi::Env env, Napi::Object exports);
+
+		/**
+		 * @brief Constructor
+		 * @param info Contains filter string and optional layer and flags
+		 */
 		WinDivert(const Napi::CallbackInfo& info);
-		virtual ~WinDivert() {
-					cout << "destroy" << endl;
-		}
+
+		/**
+		 * @brief Destructor - Cleans up resources
+		 */
+		virtual ~WinDivert();
+
 	private:
-		static Napi::FunctionReference constructor;
-
+		/**
+		 * @brief Opens the WinDivert handle
+		 * @param info Not used
+		 * @return Undefined
+		 */
 		Napi::Value open(const Napi::CallbackInfo& info);
+
+		/**
+		 * @brief Starts asynchronous packet reception
+		 * @param info Contains callback function
+		 * @return Status string
+		 */
 		Napi::Value recv(const Napi::CallbackInfo& info);
+
+		/**
+		 * @brief Closes the WinDivert handle
+		 * @param info Not used
+		 * @return Boolean indicating success
+		 */
 		Napi::Value close(const Napi::CallbackInfo& info);
+
+		/**
+		 * @brief Sends a packet through WinDivert
+		 * @param info Contains packet data and address
+		 * @return Boolean indicating success
+		 */
 		Napi::Value WinDivert::send(const Napi::CallbackInfo& info);
+
+		/**
+		 * @brief Calculates packet checksums
+		 * @param info Contains packet and flags
+		 * @return Object with calculated checksums
+		 */
 		Napi::Value WinDivert::HelperCalcChecksums(const Napi::CallbackInfo& info);
+
+		/**
+		 * @brief Starts the packet receiving thread
+		 */
+		void StartThread();
+
+		/**
+		 * @brief Stops the packet receiving thread
+		 */
+		void StopThread();
+
+		/**
+		 * @brief Main thread function for packet reception
+		 */
+		void ThreadFunction();
 		
-		string filter_;
-		Napi::String filter2_;
-		HANDLE handle_;
-		
-		
+		string filter_;                  ///< WinDivert filter string
+		UINT32 flags_;                  ///< WinDivert operation flags
+		UINT32 layer_;                  ///< WinDivert operation layer
+		HANDLE handle_;                 ///< WinDivert handle
+
+		Napi::ThreadSafeFunction tsfn;  ///< Thread-safe function for callbacks
+		std::thread recvThread;         ///< Packet receiving thread
+		std::atomic<int> closeFlag;     ///< Flag to signal thread closure			
 };
-
-
-
 #endif
-
-
-/*
-#include <node.h>
-#include <node_object_wrap.h>
-#include <string>
-
-namespace windivert {
-
-class WinDivert : public node::ObjectWrap {
- public:
-  static void Init(v8::Local<v8::Object> exports);
-WINDIVERT_ADDRESS addr;
- private:
-  explicit WinDivert(std::string filter, WINDIVERT_LAYER layer, INT16 priority, UINT64 flags);
-  ~WinDivert();
-
-  HANDLE handle;
-  
-
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void setQueueLength(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void getQueueLength(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void getQueueTime(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void setQueueTime(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void recv(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void send(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void close(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static v8::Persistent<v8::Function> constructor;
-};
-
-} 
-*/
-
-
-/*
-
-// ...
-Napi::Value Exectute(const Napi::CallbackInfo& info) {
- // Retrieve the buffer
- Napi::Buffer<char> buffer = info[0].As<Napi::Buffer<char>>();
-// continue to use the buffer ...
-}
-
-// Addon initialization code
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports["execute"] = Napi::Function::New(env, Execute);
-  return exports;
-}
-NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
-*/
