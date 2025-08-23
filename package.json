@@ -1,6 +1,6 @@
 {
   "name": "windivert",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node Bindings for Divert, currently only supports windows.",
   "scripts": {
    "test": "node ./examples/goodbyeDPI.js",

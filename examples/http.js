@@ -12,7 +12,7 @@ handle.open();
 
 // Add packet receiver
 wd.addReceiveListener(handle, (packet, addr) => {
-    console.log("Received packet with length:", packet.length);
+    console.log("Received packet with length:", packet.toString());
     // Return values:
     // - modified packet: to send modified packet
     // - undefined: to send original packet

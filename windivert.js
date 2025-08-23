@@ -108,7 +108,7 @@ function addReceiveListener(handle, callback) {
 			const newPacket = callback(packet, addr);
 			if (Buffer.isBuffer(newPacket)) {
 				try {
-					handle.HelperCalcChecksums(newPacket, 0);
+					handle.HelperCalcChecksums({ packet: newPacket }, 0);
 					handle.send({ packet: newPacket, addr })
 				} catch (error) {
 					console.error("Recv Error:", error);
